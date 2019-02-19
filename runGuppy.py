@@ -216,7 +216,7 @@ for ichunk in range(0,chunks)  :
       cmd += "   time %s/guppy_basecaller_1d2"%(guppyBin)
       #there is a bug in v2.2.2 of guppy, we need to  specify the config file
       cmd += " --config /home/sbsuser/guppy-2.2.2/data/dna_r9.5_450bps_1d2_raw.cfg"
-      cmd += " -r --input %s --save_path %s --index_file %s -t 1 --disable_pings\n"%(outdir,outdir+'/1dsq/',outdir+'/sequencing_summary.txt')
+      cmd += " -r --input %s --save_path %s --index_file %s -t 1 --disable_pings\n"%(outdir,outdir+'/1dsq_analysis/',outdir+'/sequencing_summary.txt')
    else :
       cmd += "\n"
    cmd += "fi\n\n"
