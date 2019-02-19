@@ -31,7 +31,9 @@ A RunInfo json file is generated with all the details of the experiment and base
 ### runGuppy.py
 Basecall an ONT experiment using the Guppy basecaller. The script must be invoked in the directory tree that contains the fast5 to be processed, all subdirectories are searched recursively for input.
 
-A scratch directory is created with multiple input and output subfolders (one for each job). A Slurm job array is created and submitted to the execution queue with output sequencing_summary and fastq files located in the out directories. Each Guppy instance is assigned 8 threads ( one devoted reading thread ). 
+A scratch directory is created with multiple input and output subfolders (one for each job). A Slurm job array is created and submitted to the execution queue with output sequencing_summary and fastq files located in the out directories. Each Guppy instance is assigned 8 threads ( one devoted reading thread ).
+
+If basecalling a multiplexed experiment an additional demultiplexing step must be done after this.
 
 A RunInfo json file is generated with all the details of the experiment and basecalling.
 
@@ -52,3 +54,10 @@ A RunInfo json file is generated with all the details of the experiment and base
       Output fastq is located under the stcratch/out directory. A RunInfo json
       is also created with all the experiment's details
 
+
+### runPost.py
+Final step in the bascalling process. The script merges fastq and sequencing_summary files. It also produces a very nice set of plots to asses quality of a run using the MinIONQC R package. It also compreses the resulting fastq files using the pigz command.
+
+The script submits a short 4 thread job to the execution queue trough Slurm.
+
+Script must be called inside of the run directory. Runs must have been demultiplexed prior to calling this script.
