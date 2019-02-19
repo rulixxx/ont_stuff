@@ -1,4 +1,4 @@
-# ont_stuff
+# ONT utilities
 Various utilities for analyzing Oxford Nanopore experiments
 
 ### runAlbacore.py
