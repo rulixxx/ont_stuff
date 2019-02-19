@@ -56,7 +56,7 @@ A RunInfo json file is generated with all the details of the experiment and base
 
 
 ### runPost.py
-Final step in the bascalling process. The script merges fastq and sequencing_summary files. It also produces a very nice set of plots to asses quality of a run using the MinIONQC R package. It also compreses the resulting fastq files using the pigz command.
+Final step in the bascalling process. The script merges fastq and sequencing_summary files. It also produces a very nice set of plots to asses quality of a run using the MinIONQC R package. In the final step it compreses the resulting fastq files using the pigz command.
 
 The script submits a short 4 thread job to the execution queue trough Slurm.
 
