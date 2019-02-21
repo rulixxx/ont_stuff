@@ -114,16 +114,27 @@ allFast5 += output.decode().split('\n')[:-1]
 f = h5py.File(allFast5[0],'r')
 topGroups = list(f.keys())
 if ( 'UniqueGlobalKey' in topGroups ) :
-  globalKey = 'UniqueGlobalKey' #single read fast5
+   globalKey = 'UniqueGlobalKey' #single read fast5
 else :
-  globalKey = list(f.keys())[0] #multi read fast5
+   globalKey = list(f.keys())[0] #multi read fast5
 flowcellType_fast5 = f['/%s/context_tags/'%globalKey].attrs['flowcell_type'].decode().upper()
 kit_fast5 = f['/%s/context_tags/'%globalKey].attrs['sequencing_kit'].decode().upper()
 flowcell = f['/%s/tracking_id/'%globalKey].attrs['flow_cell_id'].decode().upper()
 start = f['/%s/tracking_id/'%globalKey].attrs['exp_start_time'].decode()
 etype = f['/%s/context_tags/'%globalKey].attrs['experiment_type'].decode()
-minionId =  f['/%s/tracking_id/'%globalKey].attrs['device_id'].decode()
+deviceType =  f['/%s/tracking_id/'%globalKey].attrs['device_type'].decode()
+deviceId =  f['/%s/tracking_id/'%globalKey].attrs['device_id'].decode()
 minknowV =  f['/%s/tracking_id/'%globalKey].attrs['version'].decode()
+
+#store all the run parameters in a json
+runInfo = { 'flowcell' : flowcell, 'flowcellType' : flowcellType , 'kit': kit , 'startTime' : start, 'guppyVersion' : guppyVersion , 'pc' : pc , 'runNumber' : runNumber, 'barcoded' : False, 'experimentType' : etype, 'instrumentType' : deviceType, 'instrumentId' : deviceId, 'minknowCoreVersion' : minknowV, 'chemistry' : chemistry }
+
+f = open('./RunInfo','w')
+json.dump(runInfo,f)
+f.close()
+
+if ( flowcell == None ) :
+   print("Flowcell name is not defined in fast5, using None!")
 if (  flowcellType_fast5 == '' or kit_fast5 == '') :
   exit("Couldn't read run information from fast5 file (flowcell type %s, kit %s)!"%(flowcellType_fast5, kit_fast5) )
 
