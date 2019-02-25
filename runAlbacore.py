@@ -18,7 +18,7 @@ albacoreVersion = '2.3.4'
 
 def usage() :
    print("""
-   runAlbacore.py [-abD] [-j n] [-k kit] [-c conf]  [-f flowcell_type]
+   runAlbacore.py [-abD] [-j n] [-k kit] [-f flowcell_type]
 
       Create chunks of raw fast5 input data to run several instances of 
       the Guppy basecaller in a cluster.
@@ -77,7 +77,7 @@ for iopt,iarg in opts :
    if iopt == "-a" :
       useFast5Info = True
 
-if ( ( kit == None or flowcellType == None) and useFast5Info == False) :
+if (  kit == None and flowcellType == None and useFast5Info == False) :
    usage()
    exit()
 
@@ -86,7 +86,7 @@ if ( ( kit != None or flowcellType != None) and useFast5Info == True ) :
    usage()
    exit()
 
-if ( ( kit == None and flowcellType == None) and useFast5Info == False ) :
+if ( ( kit == None or flowcellType == None) and useFast5Info == False ) :
    print("must specify both flowcell and kit")
    usage()
    exit()
@@ -121,8 +121,13 @@ deviceType =  f['/%s/tracking_id/'%globalKey].attrs['device_type'].decode()
 deviceId =  f['/%s/tracking_id/'%globalKey].attrs['device_id'].decode()
 minknowV =  f['/%s/tracking_id/'%globalKey].attrs['version'].decode()
 
+if ( D2 ) :
+   chemistry = '1D^2'
+else :
+   chemistry = '1D'
+
 #store all the run parameters in a json
-runInfo = { 'flowcell' : flowcell, 'flowcellType' : flowcellType , 'kit': kit , 'startTime' : start, 'albacoreVersion' : albacoreVersion , 'pc' : pc , 'runNumber' : runNumber, 'barcoded' : False, 'experimentType' : etype, 'instrumentType' : deviceType, 'instrumentId' : deviceId, 'minknowCoreVersion' : minknowV, 'chemistry' : chemistry }
+runInfo = { 'flowcell' : flowcell, 'flowcellType' : flowcellType_fast5 , 'kit': kit_fast5 , 'startTime' : start, 'albacoreVersion' : albacoreVersion , 'pc' : pc , 'runNumber' : runNumber, 'barcoded' : False, 'experimentType' : etype, 'instrumentType' : deviceType, 'instrumentId' : deviceId, 'minknowCoreVersion' : minknowV, 'chemistry' : chemistry }
 
 f = open('./RunInfo','w')
 json.dump(runInfo,f)
@@ -139,12 +144,6 @@ if ( useFast5Info ) :
 else :
    if ( flowcellType != flowcellType_fast5 or kit != kit_fast5 ) :
       print("Warning specified flowcell %s and kit %s dont match fast5 info ( %s %s"%(flowcellType,kit,flowcellType_fast5,kit_fast5) )
-
-if ( D2 ) :
-   chemistry = '1D^2'
-else :
-   chemistry = '1D'
-
 
 #create the scratch directory tree ( if previous run is found remove them)
 # ./scratch/out/??/  for outputs

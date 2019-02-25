@@ -77,7 +77,8 @@ for iopt,iarg in opts :
    if iopt == "-c" :
       config = iarg
 
-if ( ( kit == None or flowcellType == None) and useFast5Info == False) :
+
+if ( kit == None and flowcellType == None and useFast5Info == False and config == None) :
    usage()
    exit()
 
@@ -86,7 +87,7 @@ if ( ( kit != None or flowcellType != None) and useFast5Info == True ) :
    usage()
    exit()
 
-if ( ( kit == None and flowcellType == None) and useFast5Info == False ) :
+if ( ( kit == None and flowcellType == None) and useFast5Info == False and config == None ) :
    print("must specify both flowcell and kit")
    usage()
    exit()
@@ -126,8 +127,13 @@ deviceType =  f['/%s/tracking_id/'%globalKey].attrs['device_type'].decode()
 deviceId =  f['/%s/tracking_id/'%globalKey].attrs['device_id'].decode()
 minknowV =  f['/%s/tracking_id/'%globalKey].attrs['version'].decode()
 
+if ( D2 ) :
+   chemistry = '1D^2'
+else :
+   chemistry = '1D'
+
 #store all the run parameters in a json
-runInfo = { 'flowcell' : flowcell, 'flowcellType' : flowcellType , 'kit': kit , 'startTime' : start, 'guppyVersion' : guppyVersion , 'pc' : pc , 'runNumber' : runNumber, 'barcoded' : False, 'experimentType' : etype, 'instrumentType' : deviceType, 'instrumentId' : deviceId, 'minknowCoreVersion' : minknowV, 'chemistry' : chemistry }
+runInfo = { 'flowcell' : flowcell, 'flowcellType' : flowcellType_fast5 , 'kit': kit_fast5 , 'startTime' : start, 'guppyVersion' : guppyVersion , 'pc' : pc , 'runNumber' : runNumber, 'barcoded' : False, 'experimentType' : etype, 'instrumentType' : deviceType, 'instrumentId' : deviceId, 'minknowCoreVersion' : minknowV, 'chemistry' : chemistry }
 
 f = open('./RunInfo','w')
 json.dump(runInfo,f)
@@ -147,17 +153,6 @@ elif ( config != None ) :
 else :
    if ( flowcellType != flowcellType_fast5 or kit != kit_fast5 ) :
       print("Warning specified flowcell %s and kit %s dont match fast5 info ( %s %s"%(flowcellType,kit,flowcellType_fast5,kit_fast5) )
-
-if ( D2 ) :
-   chemistry = '1D^2'
-else :
-   chemistry = '1D'
-
-#store all the run parameters in a json
-runInfo = { 'flowcell' : flowcell, 'flowcellType' : flowcellType , 'kit': kit , 'startTime' : start, 'guppyVersion' : guppyVersion , 'pc' : pc , 'runNumber' : runNumber, 'barcoded' : False, 'experimentType' : etype, 'minionId' : minionId, 'minknowCoreVersion' : minknowV, 'chemistry' : chemistry }
-f = open('./RunInfo','w')
-json.dump(runInfo,f)
-f.close()
 
 #to try to evenout execution time for all jobs do a shuffle of the input
 shuffle( allFast5 )
@@ -200,7 +195,7 @@ outfile.write(
 # @ error = err.%a.log
 # @ total_tasks = 1
 # @ cpus_per_task = 8
-# @ wall_clock_limit = 12:59:00
+# @ wall_clock_limit = 16:59:00
 """)
 outfile.write("# @ initialdir = .\n")
 outfile.write("# @ job_name = %s\n"%(flowcell))
@@ -215,7 +210,7 @@ for ichunk in range(0,chunks)  :
    outdir = "./scratch/out/%02d"%(ichunk)
    cmd = "if [ $SLURM_ARRAY_TASK_ID -eq %s ]; then\n"%(ichunk )
    cmd +="   time %s/guppy_basecaller"%(guppyBin)
-   cmd += " --input %s --save_path %s -t 1 --disable_pings -r"%(indir,outdir)
+   cmd += " --input %s --save_path %s --runners 8 -t 1 --disable_pings -r"%(indir,outdir)
 
    if ( config == None ) :
       cmd += " --flowcell %s --kit %s"%(flowcellType,kit)
