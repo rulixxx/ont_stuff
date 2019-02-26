@@ -1,5 +1,5 @@
 # ONT utilities
-Various utilities for efficiently basecalling Oxford Nanopore experiments in an HP environment.
+Various utilities for efficiently basecalling Oxford Nanopore experiments in an HPC environment.
 
 ### runAlbacore.py
 Basecall an ONT experiment using the Albacore basecaller (no longer being mantained). The script must be invoked in the directory tree that contains the fast5 to be processed, all subdirectories are searched recursively for input.
