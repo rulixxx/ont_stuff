@@ -74,6 +74,7 @@ outfile.write(
 outfile.write("# @ initialdir = .\n")
 outfile.write("# @ job_name = %s_%s_post\n"%(runInfo['flowcell'],1 ))
 outfile.write("\n")
+outfile.write("module purge\n")
 outfile.write("module load gcc/6.3.0\n")
 outfile.write("module load R/3.5.0\n\n")
 outfile.write("set -e\n\n")
