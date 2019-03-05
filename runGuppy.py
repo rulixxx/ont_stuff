@@ -195,12 +195,13 @@ outfile.write(
 # @ error = err.%a.log
 # @ total_tasks = 1
 # @ cpus_per_task = 8
-# @ wall_clock_limit = 16:59:00
+# @ wall_clock_limit = 18:59:00
 """)
 outfile.write("# @ initialdir = .\n")
 outfile.write("# @ job_name = %s\n"%(flowcell))
 outfile.write("# @ array = 0-%s\n\n"%(chunks-1))
 #load the required libraries
+outfile.write("module purge\n")
 outfile.write("module load gcc/4.9.3-gold\n")
 outfile.write("module add hdf5/1.8.12\n")
 outfile.write("export LD_LIBRARY_PATH=/home/sbsuser/guppy-2.2.2/lib/:$LD_LIBRARY_PATH\n")
