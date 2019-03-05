@@ -25,7 +25,7 @@ def usage() :
 
          -j   number of jobs to use (default 40)
          -D   use 1D^2 chemistry
-         -b   use the barcode keyword\n\
+         -b   use the barcode keyword
          -a   get flowcell and kit from fast5 file
          -f   flowcell type (must specify kit too)
          -k   kit used in sequencing (must specify flowcell too)
@@ -127,7 +127,7 @@ else :
    chemistry = '1D'
 
 #store all the run parameters in a json
-runInfo = { 'flowcell' : flowcell, 'flowcellType' : flowcellType_fast5 , 'kit': kit_fast5 , 'startTime' : start, 'albacoreVersion' : albacoreVersion , 'pc' : pc , 'runNumber' : runNumber, 'barcoded' : False, 'experimentType' : etype, 'instrumentType' : deviceType, 'instrumentId' : deviceId, 'minknowCoreVersion' : minknowV, 'chemistry' : chemistry }
+runInfo = { 'flowcell' : flowcell, 'flowcellType' : flowcellType_fast5 , 'kit': kit_fast5 , 'startTime' : start, 'albacoreVersion' : albacoreVersion , 'pc' : pc , 'runNumber' : runNumber, 'barcoded' : barcode, 'experimentType' : etype, 'instrumentType' : deviceType, 'instrumentId' : deviceId, 'minknowCoreVersion' : minknowV, 'chemistry' : chemistry }
 
 f = open('./RunInfo','w')
 json.dump(runInfo,f)
