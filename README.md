@@ -38,9 +38,12 @@ Demultiplexing is carried out for barcoded experiments if the barcoding flag is 
       Will merge fastq and summary files into one file. It also produces
       MinionQC for each summary file.
 
-Scratch directory should be removed upon completion to reduce inode usage. 
-        lfs find ./scratch -type f | xargs rm
-        rm -rf ./scratch
+Scratch directory should be removed upon completion to reduce inode usage.
+```
+lfs find ./scratch -type f | xargs rm
+rm -rf ./scratch
+```
+   
 
 ### runGuppy.py
 Basecall an ONT experiment using the Guppy basecaller. The script must be invoked in the directory tree that contains the fast5 to be processed, all subdirectories are searched recursively for input.
