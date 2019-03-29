@@ -50,14 +50,18 @@ Basecall an ONT experiment using the Guppy basecaller. The script must be invoke
 
 A scratch directory is created with multiple input and output subfolders (one for each job). A Slurm job array is created and submitted to the execution queue with output sequencing_summary and fastq files located in the out directories. Each Guppy instance is assigned 8 threads ( one devoted reading thread ).
 
-If basecalling a multiplexed experiment an additional demultiplexing step must be done after this.
+If basecalling a multiplexed experiment an additional demultiplexing step must be done after basecalling. Demultiplexing is carried out using qcat ( https://github.com/nanoporetech/qcat ). After comparison with other demultiplexers it was deemed the best performer. (https://community.nanoporetech.com/posts/demultiplexer-comparison)
 
-A RunInfo json file is generated with all the details of the experiment and basecalling.
+After basecalling [demultiplexing] a post processing step generates merged fastq and summary files. It also runs the MinionQC ( https://github.com/roblanf/minion_qc ) R module to produce quality control plots.
 
-    runGuppy.py [-aD] [-j n] [-k kit] [-c conf]  [-f flowcell_type]
 
-      Create chunks of raw fast5 input data to run several instances of 
-      the Guppy basecaller in a cluster.
+    1) Run basecalling:   
+
+      runGuppy.py [-aqD] [-j n] [-k kit] [-c conf]  [-f flowcell_type]
+
+      Must be called inside a run directory. Fast5 files will be searched
+      recursively. Input and output are partitioned into n segments in the
+      scratch directory.
 
          -j   number of jobs to use (default 30)
          -D   use 1D^2 chemistry
@@ -65,16 +69,23 @@ A RunInfo json file is generated with all the details of the experiment and base
          -f   flowcell type (must specify kit too)
          -k   kit used in sequencing (must specify flowcell too)
          -c   specify a configuration file (instead of flowcell & kit)
+         -q   apply quality filtering
 
-      Input fast5 must be located in the current directory tree.
-      
       Output fastq is located under the stcratch/out directory. A RunInfo json
-      is also created with all the experiment's details
+      is also created with all the experiment's details.
 
+    2) Demultiplex fasts (using qcat) :
+   
+      runGuppy.py [-j n ] [-d directory ] -B
 
-### runPost.py
-Final step in the bascalling process. The script merges fastq and sequencing_summary files. It also produces a very nice set of plots to asses quality of a run using the MinIONQC R package. In the final step it compreses the resulting fastq files using the pigz command.
+         -j   number of jobs to use (default 30)
+         -d   directory where to look for fastqs ( default ./scratch/out )
 
-The script submits a short 4 thread job to the execution queue trough Slurm.
+    3) Collect results:
 
-Script must be called inside of the run directory. Runs must have been demultiplexed prior to calling this script.
+      runGuppy.py [-z ] -P
+         
+         -z   compress merged fastq
+
+      Will merge fastq and summary files into one file. It also produces
+      MinionQC for each summary file. 
