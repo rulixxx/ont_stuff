@@ -90,6 +90,11 @@ After basecalling [demultiplexing] a post processing step generates merged fastq
       Will merge fastq and summary files into one file. It also produces
       MinionQC for each summary file. 
 
+Scratch directory should be removed upon completion to reduce inode usage.
+```
+lfs find ./scratch -type f | xargs rm
+rm -rf ./scratch
+```
 
 ### MinIONPip.py
 Example of an automated basecalling pipeline for ONT experiments. It is in large part derived from the previous script but has been rewritten in order to improve fault tolerance, to allow complete automation and an integration with a LIMS.
