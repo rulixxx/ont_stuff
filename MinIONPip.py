@@ -5,14 +5,14 @@
 #script looks for zip archives in the production directories.
 #onece a experiment triggers the script it will:
 #
-#        * check experiment deatails with LIMS
-#        * decompress the raw data
-#        * split the input reads to allow parallel processing
-#        * submit a job array to do the basecalling
-#        * demultiplex fastq with qcat using a job array
-#        * post stats to the LIMS
-#        * produce QC plots with MinionQC.R
-#        * compress fastq files and remove temporary files
+#        * Check experiment with LIMS details
+#        * Decompress raw data
+#        * Split input reads into batches to allow parallel processing
+#        * Submit a job array to do the basecalling with Guppy
+#        * Demultiplex fastqs with qcat using a job array
+#        * Post stats to the LIMS
+#        * Produce QC plots with MinionQC.R
+#        * Compress fastq files and remove temporary files
 
 import sys
 import os
@@ -67,7 +67,7 @@ subject = "MinION pipeline error"
 warnReceive = [ 'raul.alcantara@cnag.crg.eu']
 #use this address and headers for interaction with the LIMS
 base_url='http://login3'
-headers = {'content-type': 'application/json' }
+headers = {'content-type': 'application/json'}
 fc_url = "%s%s" % (base_url , "/lims/api/seq/flowcell/" ,  )
 lw_url = "%s%s" % (base_url , "/lims/api/seq/loadedwith/" ,  )
 fli_url = "%s%s" % (base_url, "/lims/api/seq/flowcell_lane_index" )
@@ -787,10 +787,13 @@ def main() :
          updateState(scratchDir,state)
       p=Popen("mv %s %s" % ( rdir+'/*', targetDir), shell=True)
       p.wait()
+      #create the clean directory and move all temp files there
+      #this way we can start processing a new run while still doing file cleanup
       cleanDir = scratchDir + '.clean'
       if ( os.path.isdir( cleanDir ) ): shutil.rmtree( cleanDir )
-      print("Launching cleaning script for %s"%pc)
       os.makedirs( cleanDir, mode = mask )
+      p=Popen("mv %s %s" % ( scratchDir+'/*', cleanDir), shell=True)
+      print("Launching cleaning script for %s"%pc)
       outfile = open(cleanDir + '/clean.cmd','w')
       outfile.write(
 """#!/bin/bash
@@ -807,9 +810,9 @@ def main() :
       outfile.write("module load parallel\n")
       outfile.write("set -e\n\n")
       outfile.write("pigz -p 8 %s/*.fastq\n"%targetDir)
-      outfile.write("lfs find %s -type f |  parallel -j3 rm\n"%(scratchDir ))
-      outfile.write("lfs find %s -type l |  parallel -j3 rm\n"%(scratchDir ))
-      outfile.write("lfs find %s | sort -r -u | xargs rm -rf\n"%(scratchDir ))
+      outfile.write("lfs find %s -type f | grep -v 'clean\.' | parallel -j3 rm\n"%(cleanDir ))
+      outfile.write("lfs find %s -type l |  parallel -j3 rm\n"%(cleanDir ))
+      outfile.write("lfs find %s | grep -v 'clean\.' | sort -r -u | xargs rm -rf\n"%(cleanDir ))
       outfile.write("touch clean.done\n")
       outfile.close()
       launch = ['/opt/perf/bin/mnsubmit', cleanDir + '/clean.cmd' ]
