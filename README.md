@@ -89,3 +89,23 @@ After basecalling [demultiplexing] a post processing step generates merged fastq
 
       Will merge fastq and summary files into one file. It also produces
       MinionQC for each summary file. 
+
+
+### MinIONPip.py
+Example of an automated basecalling pipeline for ONT experiments. It is in large part derived from the previous script but has been rewritten in order to improve fault tolerance, to allow complete automation and an integration with a LIMS.
+
+The script carries out the following:
+
+    * Check experiment with LIMS details
+    * Decompress raw data
+    * Split input reads into batches to allow parallel processing
+    * Submit a job array to do the basecalling with Guppy
+    * Demultiplex fastqs with qcat using a job array
+    * Compute stats and post to the LIMS
+    * Produce QC plots with MinionQC.R
+    * Compress fastq files and remove temporary files
+
+The pipeline is currently being run from a cron job and will look in the directories dataPC1 and dataPC2 for new experiments. It will scan for zip files and will start processing onece the file size remains constant. 
+
+A nice featuree of the pipeline is that it reports most errors by email so that problems can be diagnosed and resolved quickly.
+
