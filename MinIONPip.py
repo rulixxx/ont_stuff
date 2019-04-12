@@ -64,10 +64,10 @@ pigz = '/apps/PIGZ/2.3.1/bin/pigz'
 emailUser = 'cnaglims@gmail.com'
 emailPwd =  ''
 subject = "MinION pipeline error"
-warnReceive = [ 'raul.alcantara@cnag.crg.eu']
+warnReceive = [ 'raul.alcantara@cnag.crg.es']
 #use this address and headers for interaction with the LIMS
 base_url='http://login3'
-headers = {'content-type': 'application/json'}
+headers = {'content-type': 'application/json' }
 fc_url = "%s%s" % (base_url , "/lims/api/seq/flowcell/" ,  )
 lw_url = "%s%s" % (base_url , "/lims/api/seq/loadedwith/" ,  )
 fli_url = "%s%s" % (base_url, "/lims/api/seq/flowcell_lane_index" )
@@ -419,7 +419,7 @@ def main() :
             cmd +="   time %s/guppy_basecaller"%(guppyBin)
             cmd +="  --flowcell %s --kit %s"%(runInfo['flowcellType'],runInfo['kit'])
             cmd += " --input %s --save_path %s --runners 8 -t 1 --disable_pings -r\n"%(indir,outdir)
-            cmd += "  touch guppy%d.done\n"%(ichunk)
+            cmd += "  touch guppy.%d.done\n"%(ichunk)
             cmd += "fi\n\n"
             outfile.write(cmd)
          outfile.close()
@@ -454,10 +454,10 @@ def main() :
             # ./scratch/demux/out/?? for summary outputs
             for i in range(chunks) :   
                rlabel = "%02d"%i
-               rout = "./scratch/demux/out/%s"%(rlabel)
+               rout = "%s/scratch/demux/out/%s"%(scratchDir,rlabel)
                if ( os.path.exists(rout) ) : shutil.rmtree(rout)
                os.makedirs(rout, mode = mask)
-               rin =  "./scratch/demux/in/%s"%(rlabel)
+               rin =  "%s/scratch/demux/in/%s"%(scratchDir, rlabel)
                if ( os.path.exists(rin ) ) : shutil.rmtree(rin)
                os.makedirs(rin, mode = mask)
 
@@ -466,7 +466,7 @@ def main() :
             cycles = 0
             for ifile in allFastq :
                ifileName = ifile.split('/')[-1]
-               indir = "./scratch/demux/in/%02d/"%(ichunk)
+               indir = "%s/scratch/demux/in/%02d/"%(scratchDir,ichunk)
                src = ifile
                dst = indir + ifileName
                try :
@@ -485,7 +485,7 @@ def main() :
                demuxKit = 'NBD104/NBD114' #24 barcodes
 
             #prepare the job array for the cluster
-            outfile = open('demux.cmd','w')
+            outfile = open(scratchDir + '/demux.cmd','w')
             outfile.write(
 """#!/bin/bash
 # @ output = demux.%a.out
@@ -546,7 +546,7 @@ def main() :
 # @ wall_clock_limit = 03:59:00
 """)
          outfile.write("# @ initialdir = %s\n"%(scratchDir))
-         outfile.write("# @ job_name = %s_%s_post\n"%(runInfo['flowcell'],runInfo['runNumber'] ))
+         outfile.write("# @ job_name = %s_%s_%s_post\n"%(pc,runInfo['flowcell'],runInfo['runNumber'] ) )
          outfile.write("\n")
          outfile.write("module purge\n")
          outfile.write("module load gcc/6.3.0\n")
@@ -793,6 +793,7 @@ def main() :
       if ( os.path.isdir( cleanDir ) ): shutil.rmtree( cleanDir )
       os.makedirs( cleanDir, mode = mask )
       p=Popen("mv %s %s" % ( scratchDir+'/*', cleanDir), shell=True)
+      p.wait()
       print("Launching cleaning script for %s"%pc)
       outfile = open(cleanDir + '/clean.cmd','w')
       outfile.write(
